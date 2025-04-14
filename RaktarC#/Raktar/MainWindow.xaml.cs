@@ -14,7 +14,7 @@ namespace Raktar
 {
     public partial class MainWindow : Window
     {
-        // Változók deklarálása
+        // Változók deklarálása/
         List<Keszlet> adatok = new List<Keszlet>();
         private List<Keszlet> rendezettAdatok = new List<Keszlet>();
         private int lastSelectedIndex = -1;
