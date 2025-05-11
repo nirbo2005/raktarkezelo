@@ -1,16 +1,18 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="src\style.css">
-    <title>Információk</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/monitorok.js"></script>
-    <script type="module" src="/src/nyomtatok.js"></script>
-    <script type="module" src="/src/egerek.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>Bejelentkezés</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-container">
+    <h2>Bejelentkezés</h2>
+    <form action="login.php" method="post">
+      <input type="text" name="username" placeholder="Felhasználónév" required>
+      <input type="password" name="password" placeholder="Jelszó" required>
+      <button type="submit">Belépés</button>
+    </form>
+  </div>
+</body>
 </html>

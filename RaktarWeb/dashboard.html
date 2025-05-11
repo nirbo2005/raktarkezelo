@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>AppControl Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Készletkezelő</h1>
+  <table id="itemTable">
+    <thead>
+      <tr>
+        <th>Név</th>
+        <th>Mennyiség</th>
+        <th>Művelet</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <input type="text" id="newItemName" placeholder="Új termék neve">
+  <input type="number" id="newItemQty" placeholder="Mennyiség">
+  <button onclick="addItem()">Hozzáadás</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
