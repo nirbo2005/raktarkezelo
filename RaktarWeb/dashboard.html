@@ -15,19 +15,35 @@
         }
 
         #menu {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            background-color: #f0f0f0;
+            padding: 10px;
             margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         #menu button {
             padding: 10px 20px;
             cursor: pointer;
+            margin: 0 5px;
+            border: none;
+            background-color: transparent;
+            font-size: 16px;
+        }
+
+        #menu button.active {
+            background-color: #ddd;
         }
 
         /* Parcella view styles */
         #parcella-container {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5 oszlop */
-            grid-template-rows: repeat(2, 1fr);    /* 2 sor (A és B) */
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(2, 1fr);
             gap: 5px;
             margin-bottom: 20px;
         }
@@ -41,7 +57,7 @@
 
         .parcella-shelves {
             display: none;
-            grid-template-columns: repeat(4, 1fr); /* 4 polc oszlop */
+            grid-template-columns: repeat(4, 1fr);
             gap: 5px;
             margin-top: 10px;
         }
@@ -55,6 +71,38 @@
         .show-shelves {
             display: grid;
         }
+
+        #raktar-attekintes {
+            display: none;
+        }
+
+        #parcella-valaszto {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        #parcella-valaszto div {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #polc-termekek {
+            margin-top: 20px;
+        }
+
+        #polc-termekek ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #polc-termekek li {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 
@@ -66,7 +114,7 @@
         <button onclick="showInterface('ujTermek', this)">Új termék</button>
         <button onclick="showInterface('modositas', this)">Termék módosítása</button>
         <button onclick="showInterface('torles', this)">Termék törlése</button>
-        <div id="parcella-container"></div>
+        <button onclick="showInterface('raktar-attekintes', this)">Raktár áttekintés</button>
     </div>
 
     <div id="termekek" class="interface active">
@@ -117,64 +165,95 @@
         <button onclick="deleteItem()">Törlés</button>
     </div>
 
+    <div id="raktar-attekintes" class="interface">
+        <h2>Raktár áttekintés</h2>
+        <div id="parcella-valaszto"></div>
+        <div id="polc-termekek"></div>
+    </div>
+
     <script src="script.js"></script>
     <script>
-        function showInterface(id, clickedButton = null) {
-            const interfaces = document.querySelectorAll('.interface');
-            interfaces.forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+    function showInterface(id, clickedButton = null) {
+        console.log(`showInterface meghívva: id=${id}`); // Új console.log
+        const interfaces = document.querySelectorAll('.interface');
+        interfaces.forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
 
-            const buttons = document.querySelectorAll('#menu button');
-            buttons.forEach(btn => btn.classList.remove('active'));
+        const buttons = document.querySelectorAll('#menu button');
+        buttons.forEach(btn => btn.classList.remove('active'));
 
-            if (clickedButton) {
-                clickedButton.classList.add('active');
-            }
+        if (clickedButton) {
+            clickedButton.classList.add('active');
         }
 
-        function generateParcellaView() {
-            const parcellaContainer = document.getElementById('parcella-container');
-            parcellaContainer.innerHTML = '';
-
-            const rows = ['A', 'B'];
-            const cols = [1, 2, 3, 4, 5];
-
-            rows.forEach(row => {
-                cols.forEach(col => {
-                    const baseParcella = `${row}${col}`;
-                    const cellDiv = document.createElement('div');
-                    cellDiv.classList.add('parcella-cell');
-                    cellDiv.textContent = baseParcella;
-                    cellDiv.addEventListener('click', () => showParcellaShelves(baseParcella, cellDiv));
-                    parcellaContainer.appendChild(cellDiv);
-                });
-            });
+        if (id === 'raktar-attekintes') {
+            console.log('generateParcellaValaszto meghívása'); // Új console.log
+            generateParcellaValaszto();
         }
+    }
 
-        function showParcellaShelves(baseParcella, cellDiv) {
-            const shelves = [1, 2, 3, 4];
-            let shelvesHTML = `<div class="parcella-shelves show-shelves">`;
-            shelves.forEach(shelf => {
-                const parcellaCode = `${baseParcella}-${shelf}`;
-                shelvesHTML += `<div>${parcellaCode}</div>`;
+    function generateParcellaValaszto() {
+        console.log('generateParcellaValaszto meghívva'); // Új console.log
+        const parcellaValaszto = document.getElementById('parcella-valaszto');
+        parcellaValaszto.innerHTML = '';
+
+        const rows = ['A', 'B'];
+        const cols = [1, 2, 3, 4, 5];
+
+        rows.forEach(row => {
+            cols.forEach(col => {
+                const baseParcella = `<span class="math-inline">\{row\}</span>{col}`;
+                const cellDiv = document.createElement('div');
+                cellDiv.textContent = baseParcella;
+                cellDiv.addEventListener('click', () => showPolcTermekek(baseParcella));
+                parcellaValaszto.appendChild(cellDiv);
             });
-            shelvesHTML += `</div>`;
-            cellDiv.innerHTML = cellDiv.textContent + shelvesHTML;
-
-            // Hide other shelves
-            const allCells = document.querySelectorAll('.parcella-cell');
-            allCells.forEach(cell => {
-                if (cell !== cellDiv) {
-                    cell.innerHTML = cell.textContent.split('-')[0]; // Reset to base code
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadItems();
-            generateParcellaView();
-            showInterface('termekek', document.querySelector('#menu button:first-child'));
         });
+    }
+
+    async function showPolcTermekek(baseParcella) {
+    console.log(`showPolcTermekek meghívva: baseParcella=${baseParcella}`); // Új console.log
+    const polcTermekekDiv = document.getElementById('polc-termekek');
+    polcTermekekDiv.innerHTML = `<h2>${baseParcella} polcai:</h2>`;
+
+    try {
+        console.log('fetch hívás indítása a grid_view.php-ra'); // Új console.log
+        const res = await fetch('api/grid_view.php'); // Itt változott!
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const itemsByParcella = await res.json();
+
+        if (itemsByParcella[baseParcella]) {
+            for (let i = 1; i <= 4; i++) {
+                const polc = `<span class="math-inline">\{baseParcella\}\-</span>{i}`;
+                const termekLista = itemsByParcella[`${baseParcella}`].filter(item => item.parcella === polc); // Itt is
+
+                polcTermekekDiv.innerHTML += `<h3>${polc}</h3>`;
+                if (termekLista.length > 0) {
+                    polcTermekekDiv.innerHTML += '<ul>';
+                    termekLista.forEach(termek => {
+                        polcTermekekDiv.innerHTML += `<li><span class="math-inline">\{termek\.nev\} \(</span>{termek.mennyiseg} db)</li>`;
+                    });
+                    polcTermekekDiv.innerHTML += '</ul>';
+                } else {
+                    polcTermekekDiv.innerHTML += '<p>Nincs termék ezen a polcon.</p>';
+                }
+            }
+        } else {
+            polcTermekekDiv.innerHTML += '<p>Nincs termék ebben a parcellában.</p>';
+        }
+
+    } catch (error) {
+        console.error('Hiba a termékek betöltésekor:', error);
+        polcTermekekDiv.innerHTML = '<p>Hiba a termékek betöltésekor.</p>';
+    }
+}
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadItems();
+        showInterface('termekek', document.querySelector('#menu button:first-child'));
+    });
     </script>
 </body>
 

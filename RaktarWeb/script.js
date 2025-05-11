@@ -8,7 +8,7 @@ async function loadItems() {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const items = await res.json();
-        displayItems(items); // Use displayItems to show data
+        displayItems(items);
     } catch (error) {
         console.error('Hiba a termékek betöltésekor:', error);
         alert('Hiba a termékek betöltésekor. Kérlek, próbáld újra később.');
@@ -103,7 +103,7 @@ async function addItem() {
         } else {
             alert(result.message);
             loadItems();
-            showInterface('termekek', document.querySelector('#menu button:first-child')); // Pass the button
+            showInterface('termekek', document.querySelector('#menu button:first-child'));
         }
     } catch (error) {
         console.error('Hiba a termék hozzáadásakor:', error);
@@ -143,7 +143,7 @@ async function updateItem() {
         } else {
             alert(result.message + '. Érintett sorok: ' + result.rowsAffected);
             loadItems();
-            showInterface('termekek', document.querySelector('#menu button:first-child')); // Pass the button
+            showInterface('termekek', document.querySelector('#menu button:first-child'));
         }
     } catch (error) {
         console.error('Hiba a termék módosításakor:', error);
@@ -154,7 +154,7 @@ async function updateItem() {
 async function deleteItem(id) {
     try {
         const res = await fetch(`api/delete_item.php?id=${id}`, {
-            method: 'GET', // Or 'DELETE', if your server handles it that way
+            method: 'GET',
         });
 
         if (!res.ok) {
@@ -168,7 +168,7 @@ async function deleteItem(id) {
         } else {
             alert(result.message + '. Érintett sorok: ' + result.rowsAffected);
             loadItems();
-            showInterface('termekek', document.querySelector('#menu button:first-child')); // Pass the button
+            showInterface('termekek', document.querySelector('#menu button:first-child'));
         }
     } catch (error) {
         console.error('Hiba a termék törlésekor:', error);
@@ -178,5 +178,5 @@ async function deleteItem(id) {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadItems();
-    showInterface('termekek', document.querySelector('#menu button:first-child')); // Initial call
+    showInterface('termekek', document.querySelector('#menu button:first-child'));
 });
