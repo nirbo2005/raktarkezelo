@@ -9,6 +9,7 @@ table {
 th, td {
   border: 1px solid #ccc;
   padding: 8px;
+  text-align: left;
 }
 .login-container {
   max-width: 300px;
@@ -18,4 +19,74 @@ input, button {
   display: block;
   width: 100%;
   margin-bottom: 10px;
+}
+
+#parcellaContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+#parcellaContainer button {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+#parcellaTartalom {
+  display: flex;
+}
+
+#parcellaTartalom > div {
+  flex: 1;
+  margin-right: 20px;
+}
+
+#parcellaTartalom ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#parcellaTartalom li {
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
+
+body {
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.login-container {
+  max-width: 300px;
+  margin: 100px auto;
+}
+
+input,
+button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.warning {
+  background-color: yellow;
+}
+
+.danger {
+  background-color: red;
+  color: white;
+  /* Hogy a szöveg jobban látszódjon */
 }

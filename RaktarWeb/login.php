@@ -2,7 +2,7 @@
 session_start();
 
 $users = [
-    "admin" => "jelszo123"
+    "user" => "admin" //  Example credentials
 ];
 
 $username = $_POST['username'] ?? '';

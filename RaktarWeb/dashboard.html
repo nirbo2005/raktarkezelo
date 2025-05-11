@@ -1,26 +1,100 @@
 <!DOCTYPE html>
 <html lang="hu">
-<head>
-  <meta charset="UTF-8">
-  <title>AppControl Dashboard</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>Készletkezelő</h1>
-  <table id="itemTable">
-    <thead>
-      <tr>
-        <th>Név</th>
-        <th>Mennyiség</th>
-        <th>Művelet</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <input type="text" id="newItemName" placeholder="Új termék neve">
-  <input type="number" id="newItemQty" placeholder="Mennyiség">
-  <button onclick="addItem()">Hozzáadás</button>
 
-  <script src="script.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>Raktárkezelő</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .interface {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        #menu {
+            margin-bottom: 20px;
+        }
+
+        #menu button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Raktárkezelő</h1>
+
+    <div id="menu">
+        <button onclick="showInterface('termekek')" class="active">Termékek</button>
+        <button onclick="showInterface('ujTermek')">Új termék</button>
+        <button onclick="showInterface('modositas')">Termék módosítása</button>
+        <button onclick="showInterface('torles')">Termék törlése</button>
+    </div>
+
+    <div id="termekek" class="interface active">
+        <h2>Termékek</h2>
+        <table id="itemTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Név <button onclick="sortTable('nev')">Rendez</button></th>
+                    <th>Gyártó</th>
+                    <th>Lejárat <button onclick="sortTable('lejarat')">Rendez</button></th>
+                    <th>Ár</th>
+                    <th>Mennyiség <button onclick="sortTable('mennyiseg')">Rendez</button></th>
+                    <th>Parcella</th>
+                    <th>Műveletek</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="ujTermek" class="interface">
+        <h2>Új termék</h2>
+        <input type="text" id="newItemNev" placeholder="Név">
+        <input type="text" id="newItemGyarto" placeholder="Gyártó">
+        <input type="date" id="newItemLejarat" placeholder="Lejárat">
+        <input type="number" id="newItemAr" placeholder="Ár">
+        <input type="number" id="newItemMennyiseg" placeholder="Mennyiség">
+        <input type="text" id="newItemParcella" placeholder="Parcella">
+        <button onclick="addItem()">Hozzáadás</button>
+    </div>
+
+    <div id="modositas" class="interface">
+        <h2>Termék módosítása</h2>
+        <input type="text" id="updateItemId" placeholder="ID (vesszővel elválasztva)">
+        <input type="text" id="updateNev" placeholder="Új név">
+        <input type="text" id="updateGyarto" placeholder="Új gyártó">
+        <input type="date" id="updateLejarat" placeholder="Új lejárati dátum">
+        <input type="number" id="updateAr" placeholder="Új ár">
+        <input type="number" id="updateMennyiseg" placeholder="Új mennyiség">
+        <input type="text" id="updateParcella" placeholder="Új parcella">
+        <button onclick="updateItem()">Módosítás</button>
+    </div>
+
+    <div id="torles" class="interface">
+        <h2>Termék törlése</h2>
+        <input type="text" id="deleteItemId" placeholder="ID (vesszővel elválasztva)">
+        <button onclick="deleteItem()">Törlés</button>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function showInterface(id) {
+            const interfaces = document.querySelectorAll('.interface');
+            interfaces.forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            const buttons = document.querySelectorAll('#menu button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active'); // Highlight the clicked button
+        }
+    </script>
 </body>
+
 </html>
