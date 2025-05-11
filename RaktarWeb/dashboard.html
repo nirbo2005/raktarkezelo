@@ -22,17 +22,51 @@
             padding: 10px 20px;
             cursor: pointer;
         }
+
+        /* Parcella view styles */
+        #parcella-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 oszlop */
+            grid-template-rows: repeat(2, 1fr);    /* 2 sor (A és B) */
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .parcella-cell {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .parcella-shelves {
+            display: none;
+            grid-template-columns: repeat(4, 1fr); /* 4 polc oszlop */
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .parcella-shelves div {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .show-shelves {
+            display: grid;
+        }
     </style>
 </head>
 
 <body>
     <h1>Raktárkezelő</h1>
 
-    <div id="menu">
-        <button onclick="showInterface('termekek')" class="active">Termékek</button>
-        <button onclick="showInterface('ujTermek')">Új termék</button>
-        <button onclick="showInterface('modositas')">Termék módosítása</button>
-        <button onclick="showInterface('torles')">Termék törlése</button>
+    <div id="menu" class="navbar">
+        <button onclick="showInterface('termekek', this)" class="active">Termékek</button>
+        <button onclick="showInterface('ujTermek', this)">Új termék</button>
+        <button onclick="showInterface('modositas', this)">Termék módosítása</button>
+        <button onclick="showInterface('torles', this)">Termék törlése</button>
+        <div id="parcella-container"></div>
     </div>
 
     <div id="termekek" class="interface active">
@@ -41,11 +75,11 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Név <button onclick="sortTable('nev')">Rendez</button></th>
+                    <th>Név</th>
                     <th>Gyártó</th>
-                    <th>Lejárat <button onclick="sortTable('lejarat')">Rendez</button></th>
+                    <th>Lejárat</th>
                     <th>Ár</th>
-                    <th>Mennyiség <button onclick="sortTable('mennyiseg')">Rendez</button></th>
+                    <th>Mennyiség</th>
                     <th>Parcella</th>
                     <th>Műveletek</th>
                 </tr>
@@ -61,7 +95,7 @@
         <input type="date" id="newItemLejarat" placeholder="Lejárat">
         <input type="number" id="newItemAr" placeholder="Ár">
         <input type="number" id="newItemMennyiseg" placeholder="Mennyiség">
-        <input type="text" id="newItemParcella" placeholder="Parcella">
+        <input type="text" id="newItemParcella" placeholder="Parcella (pl. A1-1)">
         <button onclick="addItem()">Hozzáadás</button>
     </div>
 
@@ -73,7 +107,7 @@
         <input type="date" id="updateLejarat" placeholder="Új lejárati dátum">
         <input type="number" id="updateAr" placeholder="Új ár">
         <input type="number" id="updateMennyiseg" placeholder="Új mennyiség">
-        <input type="text" id="updateParcella" placeholder="Új parcella">
+        <input type="text" id="updateParcella" placeholder="Új parcella (pl. A1-1)">
         <button onclick="updateItem()">Módosítás</button>
     </div>
 
@@ -85,15 +119,62 @@
 
     <script src="script.js"></script>
     <script>
-        function showInterface(id) {
+        function showInterface(id, clickedButton = null) {
             const interfaces = document.querySelectorAll('.interface');
             interfaces.forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
 
             const buttons = document.querySelectorAll('#menu button');
             buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active'); // Highlight the clicked button
+
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
         }
+
+        function generateParcellaView() {
+            const parcellaContainer = document.getElementById('parcella-container');
+            parcellaContainer.innerHTML = '';
+
+            const rows = ['A', 'B'];
+            const cols = [1, 2, 3, 4, 5];
+
+            rows.forEach(row => {
+                cols.forEach(col => {
+                    const baseParcella = `${row}${col}`;
+                    const cellDiv = document.createElement('div');
+                    cellDiv.classList.add('parcella-cell');
+                    cellDiv.textContent = baseParcella;
+                    cellDiv.addEventListener('click', () => showParcellaShelves(baseParcella, cellDiv));
+                    parcellaContainer.appendChild(cellDiv);
+                });
+            });
+        }
+
+        function showParcellaShelves(baseParcella, cellDiv) {
+            const shelves = [1, 2, 3, 4];
+            let shelvesHTML = `<div class="parcella-shelves show-shelves">`;
+            shelves.forEach(shelf => {
+                const parcellaCode = `${baseParcella}-${shelf}`;
+                shelvesHTML += `<div>${parcellaCode}</div>`;
+            });
+            shelvesHTML += `</div>`;
+            cellDiv.innerHTML = cellDiv.textContent + shelvesHTML;
+
+            // Hide other shelves
+            const allCells = document.querySelectorAll('.parcella-cell');
+            allCells.forEach(cell => {
+                if (cell !== cellDiv) {
+                    cell.innerHTML = cell.textContent.split('-')[0]; // Reset to base code
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadItems();
+            generateParcellaView();
+            showInterface('termekek', document.querySelector('#menu button:first-child'));
+        });
     </script>
 </body>
 

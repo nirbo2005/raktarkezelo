@@ -1,10 +1,13 @@
 <?php
 header('Content-Type: application/json');
 
-$kapcsolatistring = "server=localhost;database=raktar;uid=root;password='';";
+$host = "localhost";
+$dbname = "raktar";
+$user = "root";
+$pass = "";
 
 try {
-    $conn = new mysqli($kapcsolatistring);
+    $conn = new mysqli($host, $user, $pass, $dbname);
     if ($conn->connect_error) {
         throw new Exception("Connection failed: " . $conn->connect_error);
     }
@@ -18,44 +21,82 @@ try {
     $parcella = $_POST['parcella'] ?? null;
 
     $setParts = array();
-    if ($nev !== null) $setParts[] = "nev = ?";
-    if ($gyarto !== null) $setParts[] = "gyarto = ?";
-    if ($lejarat !== null) $setParts[] = "lejarat = ?";
-    if ($ar !== null) $setParts[] = "ar = ?";
-    if ($mennyiseg !== null) $setParts[] = "mennyiseg = ?";
-    if ($parcella !== null) $setParts[] = "parcella = ?";
+    $params = array();
+    $types = "";
+
+    if ($nev !== null) {
+        $setParts[] = "nev = ?";
+        $params[] = $nev;
+        $types .= "s";
+    }
+    if ($gyarto !== null) {
+        $setParts[] = "gyarto = ?";
+        $params[] = $gyarto;
+        $types .= "s";
+    }
+    if ($lejarat !== null) {
+        $setParts[] = "lejarat = ?";
+        $params[] = $lejarat;
+        $types .= "s";
+    }
+    if ($ar !== null) {
+        $setParts[] = "ar = ?";
+        $params[] = $ar;
+        $types .= "d";
+    }
+    if ($mennyiseg !== null) {
+        $setParts[] = "mennyiseg = ?";
+        $params[] = $mennyiseg;
+        $types .= "i";
+    }
+    if ($parcella !== null) {
+        $setParts[] = "parcella = ?";
+        $params[] = $parcella;
+        $types .= "s";
+    }
 
     if (empty($setParts)) {
         throw new Exception("No fields to update.");
     }
 
-    $sql = "UPDATE keszlet SET " . implode(', ', $setParts) . " WHERE id IN (" . implode(',', array_fill(0, count(explode(',', $idk)), '?')) . ")";
+    // Sanitize the ID(s) -  Important for security!
+    $idArray = array_map('intval', explode(',', $idk));
+    $idString = implode(',', $idArray);
+
+    $sql = "UPDATE keszlet SET " . implode(', ', $setParts) . " WHERE id IN (" . implode(',', array_fill(0, count($idArray), '?')) . ")";
     $stmt = $conn->prepare($sql);
 
-    $types = str_repeat('s', ($nev !== null ? 1 : 0)) .
-             str_repeat('s', ($gyarto !== null ? 1 : 0)) .
-             str_repeat('s', ($lejarat !== null ? 1 : 0)) .
-             str_repeat('d', ($ar !== null ? 1 : 0)) .
-             str_repeat('i', ($mennyiseg !== null ? 1 : 0)) .
-             str_repeat('s', ($parcella !== null ? 1 : 0)) .
-             str_repeat('i', count(explode(',', $idk)));
-
-    $params = array();
-    if ($nev !== null) $params[] = $nev;
-    if ($gyarto !== null) $params[] = $gyarto;
-    if ($lejarat !== null) $params[] = $lejarat;
-    if ($ar !== null) $params[] = $ar;
-    if ($mennyiseg !== null) $params[] = $mennyiseg;
-    if ($parcella !== null) $params[] = $parcella;
-    foreach (explode(',', $idk) as $id) {
-        $params[] = (int)$id;
+    if (!$stmt) {
+        throw new Exception("Prepare failed: " . $conn->error);
     }
 
-    $stmt->bind_param($types, ...$params);
+    // Build types string and params array for bind_param
+    $bindParams = array();
+    $bindParams[] = &$types; // Add the types string by reference
+
+    foreach ($params as $key => $value) {
+        $bindParams[] = &$params[$key]; // Add other params by reference
+    }
+
+    // Add ID parameters to bind
+    for ($i = 0; $i < count($idArray); $i++) {
+        $bindParams[] = &$idArray[$i];
+        $types .= "i";
+    }
+
+    if (!empty($bindParams)) {
+        call_user_func_array(array($stmt, 'bind_param'), $bindParams);
+    }
+
     $stmt->execute();
+
+    if ($stmt->errno) {
+        throw new Exception("Execute failed: " . $stmt->error);
+    }
 
     echo json_encode(array('message' => 'Sikeresen módosítva', 'rowsAffected' => $stmt->affected_rows));
 
+    $stmt->close();
     $conn->close();
 
 } catch (Exception $e) {

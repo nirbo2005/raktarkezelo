@@ -1,10 +1,13 @@
 <?php
 header('Content-Type: application/json');
 
-$kapcsolatistring = "server=localhost;database=raktar;uid=root;password='';";
+$host = "localhost";
+$dbname = "raktar";
+$user = "root";
+$pass = "";
 
 try {
-    $conn = new mysqli($kapcsolatistring);
+    $conn = new mysqli($host, $user, $pass, $dbname);
     if ($conn->connect_error) {
         throw new Exception("Connection failed: " . $conn->connect_error);
     }
@@ -18,11 +21,21 @@ try {
 
     $sql = "INSERT INTO keszlet (nev, gyarto, lejarat, ar, mennyiseg, parcella) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
+
+    if (!$stmt) {
+        throw new Exception("Prepare failed: " . $conn->error);
+    }
+
     $stmt->bind_param("sssdiss", $nev, $gyarto, $lejarat, $ar, $mennyiseg, $parcella);
     $stmt->execute();
 
-    echo json_encode(array('message' => 'Sikeresen hozzáadva'));
+    if ($stmt->errno) {
+        throw new Exception("Execute failed: " . $stmt->error);
+    }
 
+    echo json_encode(array('message' => 'Sikeresen hozzáadva', 'lastInsertId' => $conn->insert_id));
+
+    $stmt->close();
     $conn->close();
 
 } catch (Exception $e) {

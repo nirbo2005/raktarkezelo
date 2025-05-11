@@ -103,7 +103,7 @@ async function addItem() {
         } else {
             alert(result.message);
             loadItems();
-            showInterface('termekek');
+            showInterface('termekek', document.querySelector('#menu button:first-child')); // Pass the button
         }
     } catch (error) {
         console.error('Hiba a termék hozzáadásakor:', error);
@@ -143,7 +143,7 @@ async function updateItem() {
         } else {
             alert(result.message + '. Érintett sorok: ' + result.rowsAffected);
             loadItems();
-            showInterface('termekek');
+            showInterface('termekek', document.querySelector('#menu button:first-child')); // Pass the button
         }
     } catch (error) {
         console.error('Hiba a termék módosításakor:', error);
@@ -152,24 +152,23 @@ async function updateItem() {
 }
 
 async function deleteItem(id) {
-    const data = new URLSearchParams();
-    data.append('id', id);
-
     try {
-        const res = await fetch('api/delete_item.php', {
-            method: 'POST',
-            body: data
+        const res = await fetch(`api/delete_item.php?id=${id}`, {
+            method: 'GET', // Or 'DELETE', if your server handles it that way
         });
+
         if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
+
         const result = await res.json();
+
         if (result.error) {
             alert('Hiba: ' + result.error);
         } else {
             alert(result.message + '. Érintett sorok: ' + result.rowsAffected);
             loadItems();
-            showInterface('termekek');
+            showInterface('termekek', document.querySelector('#menu button:first-child')); // Pass the button
         }
     } catch (error) {
         console.error('Hiba a termék törlésekor:', error);
@@ -179,5 +178,5 @@ async function deleteItem(id) {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadItems();
-    showInterface('termekek');
+    showInterface('termekek', document.querySelector('#menu button:first-child')); // Initial call
 });

@@ -1,26 +1,28 @@
 <?php
 header('Content-Type: application/json');
 
-$kapcsolatistring = "server=localhost;database=raktar;uid=root;password='';";
+$host = "localhost";
+$dbname = "raktar";
+$user = "root";
+$pass = "";
 
 try {
-    $conn = new mysqli($kapcsolatistring);
+    $conn = new mysqli($host, $user, $pass, $dbname);
     if ($conn->connect_error) {
         throw new Exception("Connection failed: " . $conn->connect_error);
     }
 
-    $idk = $_POST['id'] ?? '';
-
-    $sql = "DELETE FROM keszlet WHERE id IN (" . implode(',', array_fill(0, count(explode(',', $idk)), '?')) . ")";
-    $stmt = $conn->prepare($sql);
-
-    $types = str_repeat('i', count(explode(',', $idk)));
-    $params = array_map('intval', explode(',', $idk));
-
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-
-    echo json_encode(array('message' => 'Sikeresen törölve', 'rowsAffected' => $stmt->affected_rows));
+    if (isset($_GET['id'])) {
+        $id = $conn->real_escape_string($_GET['id']); // Fontos a biztonság!
+        $sql = "DELETE FROM keszlet WHERE id = $id";
+        if ($conn->query($sql) === TRUE) {
+            echo json_encode(array('message' => 'Termék sikeresen törölve.', 'rowsAffected' => $conn->affected_rows));
+        } else {
+            throw new Exception("Error deleting record: " . $conn->error);
+        }
+    } else {
+        throw new Exception("No ID provided.");
+    }
 
     $conn->close();
 
