@@ -26,7 +26,7 @@ try {
         throw new Exception("Prepare failed: " . $conn->error);
     }
 
-    $stmt->bind_param("sssdiss", $nev, $gyarto, $lejarat, $ar, $mennyiseg, $parcella);
+    $stmt->bind_param("ssssss", $nev, $gyarto, $lejarat, $ar, $mennyiseg, $parcella);
     $stmt->execute();
 
     if ($stmt->errno) {

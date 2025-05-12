@@ -25,6 +25,18 @@ button {
   display: block;
   width: 100%;
   margin-bottom: 10px;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+}
+
+button {
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+button:hover {
+  background-color: #ddd;
 }
 
 #parcella-container {
@@ -164,10 +176,8 @@ input[type="date"] {
 
 #parcella-valaszto {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  /* 5 oszlop */
-  grid-template-rows: repeat(2, 1fr);
-  /* 2 sor */
+  grid-template-columns: repeat(5, 1fr); /* 5 oszlop */
+  grid-template-rows: repeat(2, 1fr); /* 2 sor */
   gap: 5px;
   margin-bottom: 20px;
 }
@@ -177,4 +187,17 @@ input[type="date"] {
   padding: 10px;
   text-align: center;
   cursor: pointer;
+}
+
+#polc-termekek {
+  margin-top: 20px;
+}
+
+#polc-termekek ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#polc-termekek li {
+  margin-bottom: 5px;
 }

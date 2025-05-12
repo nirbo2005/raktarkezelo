@@ -40,6 +40,7 @@ function displayItems(items) {
             <td class="${rowClass}">${item.mennyiseg}</td>
             <td class="${rowClass}">${item.parcella}</td>
             <td class="${rowClass}">
+                <button onclick="openModifyForm('${item.id}')">Módosítás</button>
                 <button onclick="deleteItem('${item.id}')">Törlés</button>
             </td>
         `;
@@ -71,6 +72,12 @@ function sortTable(columnName) {
             });
             displayItems(items);
         });
+}
+
+function openModifyForm(itemId) {
+    showInterface('modositas');
+    document.getElementById('updateItemId').value = itemId;
+    // Itt lehetne az űrlapot feltölteni az adott termék adataival, ha szükséges
 }
 
 async function addItem() {
@@ -173,6 +180,100 @@ async function deleteItem(id) {
     } catch (error) {
         console.error('Hiba a termék törlésekor:', error);
         alert('Hiba a termék törlésekor. Kérlek, próbáld újra később.');
+    }
+}
+
+function showInterface(id, clickedButton = null) {
+    console.log(`showInterface meghívva: id=${id}`);
+    const interfaces = document.querySelectorAll('.interface');
+    interfaces.forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+
+    const buttons = document.querySelectorAll('#menu button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    if (clickedButton) {
+        clickedButton.classList.add('active');
+    }
+
+    if (id === 'raktar-attekintes') {
+        console.log('generateParcellaValaszto meghívása');
+        generateParcellaValaszto();
+    }
+}
+
+function generateParcellaValaszto() {
+    console.log('generateParcellaValaszto meghívva');
+    const parcellaValaszto = document.getElementById('parcella-valaszto');
+    parcellaValaszto.innerHTML = '';
+
+    const rows = ['A', 'B'];
+    const cols = [1, 2, 3, 4, 5];
+
+    rows.forEach(row => {
+        cols.forEach(col => {
+            const baseParcella = `${row}${col}`;
+            const cellDiv = document.createElement('div');
+            cellDiv.textContent = baseParcella;
+            cellDiv.addEventListener('click', () => showPolcTermekek(baseParcella));
+            parcellaValaszto.appendChild(cellDiv);
+        });
+    });
+}
+
+async function showPolcTermekek(baseParcella) {
+    console.log(`showPolcTermekek meghívva: baseParcella=${baseParcella}`);
+    const polcTermekekDiv = document.getElementById('polc-termekek');
+    polcTermekekDiv.innerHTML = `<h2>${baseParcella} polcai:</h2><div style="display: flex; gap: 20px;"></div>`;
+    const polcContainer = polcTermekekDiv.querySelector('div'); // Létrehozunk egy konténert a polcoknak
+
+    try {
+        console.log('fetch hívás indítása a grid_view.php-ra');
+        const res = await fetch('api/grid_view.php');
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const itemsByPolc = await res.json();
+        console.log('grid_view.php válasza:', itemsByPolc);
+
+        let vanTermek = false; // Jelzi, hogy volt-e termék a parcellában
+
+        for (let i = 1; i <= 4; i++) {
+            const polcNev = `${baseParcella}-${i}`;
+            if (itemsByPolc.hasOwnProperty(polcNev)) {
+                const termekDiv = document.createElement('div'); // Létrehozunk egy div-et minden polcnak
+                termekDiv.innerHTML = `<h3>${i}. polc</h3><ul></ul>`;
+                const termekListaUL = termekDiv.querySelector('ul');
+                const termekLista = itemsByPolc[polcNev];
+
+                if (termekLista && termekLista.length > 0) {
+                    termekLista.forEach(termek => {
+                        const li = document.createElement('li');
+                        li.textContent = `${termek.nev} (${termek.mennyiseg} db)`;
+                        termekListaUL.appendChild(li);
+                    });
+                    vanTermek = true;
+                    polcContainer.appendChild(termekDiv); // Hozzáadjuk a polcot a konténerhez
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = 'Nincs termék ezen a polcon.';
+                    termekListaUL.appendChild(li);
+                    polcContainer.appendChild(termekDiv); // Üres polcot is hozzáadjuk
+                }
+            } else {
+                const termekDiv = document.createElement('div');
+                termekDiv.innerHTML = `<h3>${i}. polc</h3><ul><li>Nincs termék ezen a polcon.</li></ul>`;
+                polcContainer.appendChild(termekDiv); // Nem létező polcot is hozzáadjuk
+            }
+        }
+
+        if (!vanTermek && polcContainer.children.length === 0) {
+            polcTermekekDiv.innerHTML += '<p>Nincs termék ebben a parcellában.</p>';
+        }
+
+    } catch (error) {
+        console.error('Hiba a termékek betöltésekor:', error);
+        polcTermekekDiv.innerHTML = '<p>Hiba a termékek betöltésekor.</p>';
     }
 }
 
