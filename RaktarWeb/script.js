@@ -40,11 +40,22 @@ function displayItems(items) {
             <td class="${rowClass}">${item.mennyiseg}</td>
             <td class="${rowClass}">${item.parcella}</td>
             <td class="${rowClass}">
-                <button onclick="openModifyForm('${item.id}')">Módosítás</button>
-                <button onclick="deleteItem('${item.id}')">Törlés</button>
+                <button class="modify-item-btn" data-id="${item.id}">Módosítás</button>
+                <button class="delete-item-btn" data-id="${item.id}">Törlés</button>
             </td>
         `;
         tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll('.modify-item-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            openModifyForm(event.target.dataset.id);
+        });
+    });
+    document.querySelectorAll('.delete-item-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            deleteItem(event.target.dataset.id);
+        });
     });
 }
 
@@ -77,7 +88,6 @@ function sortTable(columnName) {
 function openModifyForm(itemId) {
     showInterface('modositas');
     document.getElementById('updateItemId').value = itemId;
-    // Itt lehetne az űrlapot feltölteni az adott termék adataival, ha szükséges
 }
 
 async function addItem() {
@@ -110,7 +120,7 @@ async function addItem() {
         } else {
             alert(result.message);
             loadItems();
-            showInterface('termekek', document.querySelector('#menu button:first-child'));
+            showInterface('termekek', document.getElementById('btnTermekek'));
         }
     } catch (error) {
         console.error('Hiba a termék hozzáadásakor:', error);
@@ -150,7 +160,7 @@ async function updateItem() {
         } else {
             alert(result.message + '. Érintett sorok: ' + result.rowsAffected);
             loadItems();
-            showInterface('termekek', document.querySelector('#menu button:first-child'));
+            showInterface('termekek', document.getElementById('btnTermekek'));
         }
     } catch (error) {
         console.error('Hiba a termék módosításakor:', error);
@@ -175,7 +185,7 @@ async function deleteItem(id) {
         } else {
             alert(result.message + '. Érintett sorok: ' + result.rowsAffected);
             loadItems();
-            showInterface('termekek', document.querySelector('#menu button:first-child'));
+            showInterface('termekek', document.getElementById('btnTermekek'));
         }
     } catch (error) {
         console.error('Hiba a termék törlésekor:', error);
@@ -184,7 +194,6 @@ async function deleteItem(id) {
 }
 
 function showInterface(id, clickedButton = null) {
-    console.log(`showInterface meghívva: id=${id}`);
     const interfaces = document.querySelectorAll('.interface');
     interfaces.forEach(el => el.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -196,14 +205,15 @@ function showInterface(id, clickedButton = null) {
         clickedButton.classList.add('active');
     }
 
-    if (id === 'raktar-attekintes') {
-        console.log('generateParcellaValaszto meghívása');
+    // Ha nem a raktár áttekintés felületre váltunk, ürítsük a polc-termekek div-et
+    if (id !== 'raktar-attekintes') {
+        document.getElementById('polc-termekek').innerHTML = '';
+    } else {
         generateParcellaValaszto();
     }
 }
 
 function generateParcellaValaszto() {
-    console.log('generateParcellaValaszto meghívva');
     const parcellaValaszto = document.getElementById('parcella-valaszto');
     parcellaValaszto.innerHTML = '';
 
@@ -211,39 +221,42 @@ function generateParcellaValaszto() {
     const cols = [1, 2, 3, 4, 5];
 
     rows.forEach(row => {
+        const rowDiv = document.createElement('div'); // Új div a sor gombjainak
         cols.forEach(col => {
             const baseParcella = `${row}${col}`;
             const cellDiv = document.createElement('div');
             cellDiv.textContent = baseParcella;
             cellDiv.addEventListener('click', () => showPolcTermekek(baseParcella));
-            parcellaValaszto.appendChild(cellDiv);
+            rowDiv.appendChild(cellDiv);
         });
+        parcellaValaszto.appendChild(rowDiv); // Hozzáadjuk a sort tartalmazó div-et
     });
 }
 
 async function showPolcTermekek(baseParcella) {
-    console.log(`showPolcTermekek meghívva: baseParcella=${baseParcella}`);
     const polcTermekekDiv = document.getElementById('polc-termekek');
-    polcTermekekDiv.innerHTML = `<h2>${baseParcella} polcai:</h2><div style="display: flex; gap: 20px;"></div>`;
-    const polcContainer = polcTermekekDiv.querySelector('div'); // Létrehozunk egy konténert a polcoknak
+    polcTermekekDiv.innerHTML = `<h2>${baseParcella} polcai:</h2><div></div>`;
+
+    const polcHeader = polcTermekekDiv.querySelector('h2');
+    polcHeader.id = 'polc-header';
+
+    const polcContainer = polcTermekekDiv.querySelector('div');
 
     try {
-        console.log('fetch hívás indítása a grid_view.php-ra');
         const res = await fetch('api/grid_view.php');
         if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         const itemsByPolc = await res.json();
-        console.log('grid_view.php válasza:', itemsByPolc);
-
-        let vanTermek = false; // Jelzi, hogy volt-e termék a parcellában
 
         for (let i = 1; i <= 4; i++) {
             const polcNev = `${baseParcella}-${i}`;
+            const termekDiv = document.createElement('div');
+            termekDiv.classList.add('polc-termekek-item');
+            termekDiv.innerHTML = `<h3>${i}. polc</h3><ul></ul>`;
+            const termekListaUL = termekDiv.querySelector('ul');
+
             if (itemsByPolc.hasOwnProperty(polcNev)) {
-                const termekDiv = document.createElement('div'); // Létrehozunk egy div-et minden polcnak
-                termekDiv.innerHTML = `<h3>${i}. polc</h3><ul></ul>`;
-                const termekListaUL = termekDiv.querySelector('ul');
                 const termekLista = itemsByPolc[polcNev];
 
                 if (termekLista && termekLista.length > 0) {
@@ -252,24 +265,20 @@ async function showPolcTermekek(baseParcella) {
                         li.textContent = `${termek.nev} (${termek.mennyiseg} db)`;
                         termekListaUL.appendChild(li);
                     });
-                    vanTermek = true;
-                    polcContainer.appendChild(termekDiv); // Hozzáadjuk a polcot a konténerhez
                 } else {
                     const li = document.createElement('li');
                     li.textContent = 'Nincs termék ezen a polcon.';
                     termekListaUL.appendChild(li);
-                    polcContainer.appendChild(termekDiv); // Üres polcot is hozzáadjuk
                 }
             } else {
-                const termekDiv = document.createElement('div');
-                termekDiv.innerHTML = `<h3>${i}. polc</h3><ul><li>Nincs termék ezen a polcon.</li></ul>`;
-                polcContainer.appendChild(termekDiv); // Nem létező polcot is hozzáadjuk
+                const li = document.createElement('li');
+                li.textContent = 'Nincs termék ezen a polcon.';
+                termekListaUL.appendChild(li);
             }
+            polcContainer.appendChild(termekDiv);
         }
 
-        if (!vanTermek && polcContainer.children.length === 0) {
-            polcTermekekDiv.innerHTML += '<p>Nincs termék ebben a parcellában.</p>';
-        }
+        polcHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (error) {
         console.error('Hiba a termékek betöltésekor:', error);
@@ -279,5 +288,26 @@ async function showPolcTermekek(baseParcella) {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadItems();
-    showInterface('termekek', document.querySelector('#menu button:first-child'));
+    sortTable('nev'); 
+    
+    showInterface('termekek', document.getElementById('btnTermekek'));
+
+    // Navigation buttons
+    document.getElementById('btnTermekek').addEventListener('click', (event) => showInterface('termekek', event.target));
+    document.getElementById('btnUjTermek').addEventListener('click', (event) => showInterface('ujTermek', event.target));
+    document.getElementById('btnModositas').addEventListener('click', (event) => showInterface('modositas', event.target));
+    document.getElementById('btnTorles').addEventListener('click', (event) => showInterface('torles', event.target));
+    document.getElementById('btnRaktarAttekintes').addEventListener('click', (event) => showInterface('raktar-attekintes', event.target));
+
+    // Table sorting buttons
+    document.getElementById('btnSortNev').addEventListener('click', () => sortTable('nev'));
+    document.getElementById('btnSortLejarat').addEventListener('click', () => sortTable('lejarat'));
+    document.getElementById('btnSortMennyiseg').addEventListener('click', () => sortTable('mennyiseg'));
+
+    // Form submission buttons
+    document.getElementById('btnAddItem').addEventListener('click', addItem);
+    document.getElementById('btnUpdateItem').addEventListener('click', updateItem);
+    document.getElementById('btnDeleteItem').addEventListener('click', () => {
+        deleteItem(document.getElementById('deleteItemId').value);
+    });
 });

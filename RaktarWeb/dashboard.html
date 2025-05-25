@@ -4,26 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <title>Raktárkezelő</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 
 <body>
     <h1>Raktárkezelő</h1>
 
     <div id="menu" class="navbar">
-        <button onclick="showInterface('termekek', this)" class="active">Termékek</button>
-        <button onclick="showInterface('ujTermek', this)">Új termék</button>
-        <button onclick="showInterface('modositas', this)">Termék módosítása</button>
-        <button onclick="showInterface('torles', this)">Termék törlése</button>
-        <button onclick="showInterface('raktar-attekintes', this)">Raktár áttekintés</button>
+        <button id="btnTermekek" class="active">Termékek</button>
+        <button id="btnUjTermek">Új termék</button>
+        <button id="btnModositas">Termék módosítása</button>
+        <button id="btnTorles">Termék törlése</button>
+        <button id="btnRaktarAttekintes">Raktár áttekintés</button>
     </div>
 
     <div id="termekek" class="interface active">
         <h2>Termékek</h2>
         <div>
-            <button onclick="sortTable('nev')">Rendezés név szerint</button>
-            <button onclick="sortTable('lejarat')">Rendezés lejárati dátum szerint</button>
-            <button onclick="sortTable('mennyiseg')">Rendezés mennyiség szerint</button>
+            <button id="btnSortNev">Rendezés név szerint</button>
+            <button id="btnSortLejarat">Rendezés lejárati dátum szerint</button>
+            <button id="btnSortMennyiseg">Rendezés mennyiség szerint</button>
         </div>
         <table id="itemTable">
             <thead>
@@ -50,7 +52,7 @@
         <input type="number" id="newItemAr" placeholder="Ár">
         <input type="number" id="newItemMennyiseg" placeholder="Mennyiség">
         <input type="text" id="newItemParcella" placeholder="Parcella (pl. A1-1)">
-        <button onclick="addItem()">Hozzáadás</button>
+        <button id="btnAddItem">Hozzáadás</button>
     </div>
 
     <div id="modositas" class="interface">
@@ -62,13 +64,13 @@
         <input type="number" id="updateAr" placeholder="Új ár">
         <input type="number" id="updateMennyiseg" placeholder="Új mennyiség">
         <input type="text" id="updateParcella" placeholder="Új parcella (pl. A1-1)">
-        <button onclick="updateItem()">Módosítás</button>
+        <button id="btnUpdateItem">Módosítás</button>
     </div>
 
     <div id="torles" class="interface">
         <h2>Termék törlése</h2>
         <input type="text" id="deleteItemId" placeholder="ID (vesszővel elválasztva)">
-        <button onclick="deleteItem(document.getElementById('deleteItemId').value)">Törlés</button>
+        <button id="btnDeleteItem">Törlés</button>
     </div>
 
     <div id="raktar-attekintes" class="interface">
@@ -77,7 +79,6 @@
         <div id="polc-termekek"></div>
     </div>
 
-    <script src="script.js"></script>
 </body>
 
 </html>
